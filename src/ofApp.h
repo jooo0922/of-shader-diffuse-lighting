@@ -8,6 +8,13 @@ struct CameraData {
     float fov;
 };
 
+// 조명벡터 연산에 필요한 라이트(정확히는 Directional Light)의 데이터를 모아둔 구조체 타입 지정.
+struct DirectionalLight {
+    glm::vec3 direction; // 조명의 방향 (이 값을 c++ 에서 뒤집고, 정규화하여 셰이더에서 조명벡터로 사용할거임)
+    glm::vec3 color; // 조명의 색상 (셰이더에서 계산된 노말벡터와 조명벡터의 내적값, 즉 조명량과 곱해줄거임)
+    float intensity; // 조명의 강도 (c++ 에서 조명의 색상과 곱해줘서 조명색의 밝기를 결정함.)
+};
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -29,5 +36,6 @@ class ofApp : public ofBaseApp{
 		
     ofMesh torusMesh; // torus.ply 모델링 파일을 로드해서 사용할 메쉬 객체 변수 선언
     ofShader normalShader; // torus.ply 모델의 버텍스 노멀벡터를 보간하여 색상 데이터로 사용할 셰이더 객체 변수 선언
+    ofShader diffuseShader; // torus.ply 에 디퓨즈 라이팅(램버트 라이팅)을 적용할 때 사용할 셰이더 객체 변수 선언
     CameraData cam;
 };
