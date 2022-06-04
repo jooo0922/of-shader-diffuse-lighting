@@ -17,10 +17,12 @@ glm::vec3 getLightColor(DirectionalLight& l) {
 void ofApp::setup(){
     ofDisableArbTex(); // 스크린 픽셀 좌표를 사용하는 텍스쳐 관련 오픈프레임웍스 레거시 지원 설정 비활성화. (uv좌표계랑 다르니까!)
     ofEnableDepthTest(); // 깊이테스트를 활성화하여 z좌표값을 깊이버퍼에 저장해서 z값을 기반으로 앞뒤를 구분하여 렌더링할 수 있도록 함.
+    ofSetBackgroundColor(0, 0, 0); // 배경 색상을 검정색으로 지정해서 림라이트 효과가 더 잘 보이도록 함.
     
     torusMesh.load("torus.ply"); // torus 메쉬로 사용할 모델링 파일 로드
     // normalShader.load("mesh.vert", "normal_vis.frag"); // torus 메쉬에 사용할 셰이더 파일 로드
-    diffuseShader.load("mesh.vert", "diffuse.frag"); // torus 메쉬에 디퓨즈 라이팅을 적용하기 위한 세이더 파일 로드 (버텍스 셰이더는 이전과 동일.)
+    // diffuseShader.load("mesh.vert", "diffuse.frag"); // torus 메쉬에 디퓨즈 라이팅을 적용하기 위한 세이더 파일 로드 (버텍스 셰이더는 이전과 동일.)
+    diffuseShader.load("mesh.vert", "rimlight.frag"); // torus 메쉬에 디퓨즈 라이팅 + 림라이트 를 적용하기 위한 셰이더 파일 로드 (버텍스 셰이더는 이전과 동일.)
 }
 
 //--------------------------------------------------------------
@@ -79,11 +81,13 @@ void ofApp::draw(){
     // normalShader 를 바인딩하여 사용 시작
     diffuseShader.begin();
     
+    diffuseShader.setUniformMatrix4f("model", model); // 버텍스 좌표를 월드좌표로 변환하기 위해 모델행렬만 따로 버텍스 셰이더 유니폼 변수로 전송
     diffuseShader.setUniformMatrix4f("mvp", mvp); // 위에서 한꺼번에 합쳐준 mvp 행렬을 버텍스 셰이더 유니폼 변수로 전송
     diffuseShader.setUniformMatrix3f("normalMatrix", normalMatrix); // 노말행렬을 버텍스 셰이더 유니폼 변수로 전송
     diffuseShader.setUniform3f("meshCol", glm::vec3(1, 0, 0)); // 물체의 원 색상은 빨간색으로 지정헤서 유니폼 변수로 전송 (이 값을 셰이더에서 조명색상과 곱해서 섞어줌.)
     diffuseShader.setUniform3f("lightDir", getLightDirection(dirLight)); // 조명벡터를 음수화하여 뒤집어주고, 다시 정규화하여 길이를 1로 맞춘 뒤, 유니폼 변수로 전송
     diffuseShader.setUniform3f("lightCol", getLightColor(dirLight)); // 조명색상을 조명강도와 곱해준 뒤, 유니폼 변수로 전송
+    diffuseShader.setUniform3f("cameraPos", cam.pos); // 프래그먼트 셰이더에서 뷰 벡터를 계산하기 위해 카메라 좌표(카메라 월드좌표)를 프래그먼트 셰이더 유니폼 변수로 전송
     torusMesh.draw(); // torus 메쉬 드로우콜 호출하여 그려줌.
     
     diffuseShader.end();

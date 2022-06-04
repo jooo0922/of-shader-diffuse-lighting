@@ -6,10 +6,13 @@ layout(location = 2) in vec3 nrm; // 이번에는 torus 모델의 노멀벡터 �
 
 uniform mat4 mvp; // c++ (오픈프레임웍스)에서 합쳐준 투영 * 뷰 * 모델 행렬을 전달받는 유니폼 변수
 uniform mat3 normalMatrix; // 조명계산에 필요한 노멀벡터(즉, 월드공간으로 변환된 노멀벡터)를 계산하려면, 노말행렬을 따로 구해서 버텍스 셰이더에 가져옴.
+uniform mat4 model; // 각 버텍스의 월드좌표를 구하기 위해 mvp 행렬과 별도로 전달받는 모델행렬을 저장할 유니폼 변수
 
 out vec3 fragNrm; // 프래그먼트 셰이더로 전송할 torus 모델의 노멀벡터
+out vec3 fragWorldPos; // 각 버텍스 셰이더의 월드좌표를 구한 뒤 보간해서 프래그먼트 셰이더로 내보낼 때 사용할 out 변수
 
 void main() {
   gl_Position = mvp * vec4(pos, 1.0);
   fragNrm = (normalMatrix * nrm).xyz; // 노말행렬과 오브젝트공간 기준의 노말벡터를 구해서 월드공간으로 변환된 노말벡터를 구함.
+  fragWorldPos = (model * vec4(pos, 1.0)).xyz; // 버텍스 좌표를 동차좌표로 변환해서 모델행렬과 곱함으로써 월드좌표로 변환하고, vec4값의 xyz만 swizzle 하여 프래그먼트 셰이더로 보간해서 내보냄.
 }
